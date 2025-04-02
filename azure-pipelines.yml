@@ -11,10 +11,10 @@ resources:
 variables:
   # Container registry service connection established during pipeline creation
   dockerRegistryServiceConnection: '567ffd2f-c386-494b-bf44-e37085a5900a'
-  imageRepository: 'chengpythonms'
+  imageRepository: 'python-ms'
   containerRegistry: 'johnnycheng0306containerreg.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
-  tag: '$(Build.BuildId)'
+  tag: 'latest'
 
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
@@ -35,5 +35,8 @@ stages:
         repository: $(imageRepository)
         dockerfile: $(dockerfilePath)
         containerRegistry: $(dockerRegistryServiceConnection)
+        buildArgs: |
+          BUILDPLATFORM=linux/amd64
+        arguments: '--platform linux/amd64'
         tags: |
           $(tag)
