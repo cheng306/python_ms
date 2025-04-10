@@ -10,6 +10,10 @@ def hello():
 def health():
     return jsonify({"status": "healthy"})
 
+@app.route('/testing')
+def hello():
+    return jsonify({"message": "testing"})
+
 if __name__ == '__main__':
     print("Starting microservice...")
     print("hello Johnny")
