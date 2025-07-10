@@ -25,16 +25,16 @@ jobs:
           docker build --platform linux/amd64 -t ${{ secrets.AZURE_CONTAINER_REGISTRY_LOGIN_SERVER }}/python-ms:latest .
           docker push ${{ secrets.AZURE_CONTAINER_REGISTRY_LOGIN_SERVER }}/python-ms:latest
       
-      - name: Azure Login
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      # - name: Azure Login
+      #   uses: azure/login@v1
+      #   with:
+      #     creds: ${{ secrets.AZURE_CREDENTIALS }}
       
-      - name: Update Azure Container App
-        uses: azure/CLI@v1
-        with:
-          inlineScript: |
-            az containerapp update \
-              --name ${{ secrets.CONTAINER_APP_NAME }} \
-              --resource-group ${{ secrets.RESOURCE_GROUP }} \
-              --image ${{ secrets.AZURE_CONTAINER_REGISTRY_LOGIN_SERVER }}/python-ms:latest
+      # - name: Update Azure Container App
+      #   uses: azure/CLI@v1
+      #   with:
+      #     inlineScript: |
+      #       az containerapp update \
+      #         --name ${{ secrets.CONTAINER_APP_NAME }} \
+      #         --resource-group ${{ secrets.RESOURCE_GROUP }} \
+      #         --image ${{ secrets.AZURE_CONTAINER_REGISTRY_LOGIN_SERVER }}/python-ms:latest
