@@ -1,42 +1,70 @@
-# Docker
-# Build and push an image to Azure Container Registry
-# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
-
+# Azure DevOps Pipeline - equivalent to your GitHub Actions workflow
 trigger:
-- main
+  branches:
+    include:
+      - main  # Trigger on push to main branch
 
-resources:
-- repo: self
+pool:
+  vmImage: 'ubuntu-latest'  # Equivalent to runs-on: ubuntu-latest
 
 variables:
-  # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: '567ffd2f-c386-494b-bf44-e37085a5900a'
-  imageRepository: 'python-ms'
+  # Define your variables here (equivalent to secrets in GitHub)
   containerRegistry: 'johnnycheng0306containerreg.azurecr.io'
+  imageRepository: 'python-ms'
   dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
   tag: 'latest'
-
-  # Agent VM image name
-  vmImageName: 'ubuntu-latest'
+  # You can also use $(Build.BuildId) for unique tags
+  
+  # Workload Identity federation connection name
+  serviceConnection: 'PROJ-to-johnnycheng0306containerreg'
 
 stages:
-- stage: Build
-  displayName: Build and push stage
+- stage: BuildAndPush
+  displayName: 'Build and Push Docker Image'
   jobs:
   - job: Build
-    displayName: Build
-    pool:
-      vmImage: $(vmImageName)
+    displayName: 'Build and Push'
     steps:
+    
+    # Equivalent to: - name: Checkout code
+    # (Azure DevOps automatically checks out code, no explicit step needed)
+    
+    # Equivalent to: Log in to Azure Container Registry
     - task: Docker@2
-      displayName: Build and push an image to container registry
+      displayName: 'Log in to Azure Container Registry'
       inputs:
-        command: buildAndPush
-        repository: $(imageRepository)
-        dockerfile: $(dockerfilePath)
-        containerRegistry: $(dockerRegistryServiceConnection)
-        buildArgs: |
-          BUILDPLATFORM=linux/amd64
-        arguments: '--platform linux/amd64'
+        command: 'login'
+        containerRegistry: '$(serviceConnection)'
+    
+    # Equivalent to: Build and push Docker image
+    - task: Docker@2
+      displayName: 'Build Docker image'
+      inputs:
+        command: 'build'
+        dockerfile: '$(dockerfilePath)'
+        repository: '$(containerRegistry)/$(imageRepository)'
         tags: |
           $(tag)
+        arguments: '--platform linux/amd64'
+    
+    - task: Docker@2
+      displayName: 'Push Docker image'
+      inputs:
+        command: 'push'
+        repository: '$(containerRegistry)/$(imageRepository)'
+        tags: |
+          $(tag)
+        containerRegistry: '$(serviceConnection)'
+    
+    # Optional: Azure CLI task (equivalent to commented Azure Login + Container App update)
+    # - task: AzureCLI@2
+    #   displayName: 'Update Azure Container App'
+    #   inputs:
+    #     azureSubscription: '$(serviceConnection)'
+    #     scriptType: 'bash'
+    #     scriptLocation: 'inlineScript'
+    #     inlineScript: |
+    #       az containerapp update \
+    #         --name $(CONTAINER_APP_NAME) \
+    #         --resource-group $(RESOURCE_GROUP) \
+    #         --image $(containerRegistry)/$(imageRepository):$(tag)
