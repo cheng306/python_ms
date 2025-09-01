@@ -1,4 +1,3 @@
-# filepath: /Users/johnnycheng/projects/python_ms/tests/test_app.py
 import sys
 import os
 import json
@@ -26,3 +25,9 @@ def test_health_endpoint(client):
     data = json.loads(response.data)
     assert response.status_code == 200
     assert data['status'] == 'healthy'
+
+def test_johnnycheng_endpoint(client):
+    response = client.get('/johnnycheng')
+    data = json.loads(response.data)
+    assert response.status_code == 200
+    assert data['message'] == 'Hello Johnny Cheng'
